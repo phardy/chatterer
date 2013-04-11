@@ -78,8 +78,10 @@ namespace RBR
         private int chatter_freq = 3;
         private float beep_vol_slider = 1f;
         private float chatter_vol_slider = 1f;
+        private float launch_vol_slider = 1f;
         private float prev_beep_vol_slider;
         private float prev_chatter_vol_slider;
+        private float prev_launch_vol_slider;
         private int prev_beep_freq;
         private int prev_chatter_freq;
         private float beep_pitch_slider = 1f;
@@ -273,7 +275,7 @@ namespace RBR
             if (launch != null && www_launch != null)
             {
                 launch.clip = www_launch.GetAudioClip (false);
-                launch.volume = chatter_vol_slider;
+                launch.volume = launch_vol_slider;
                 launch.Stop();
                 all_launch_clips.Add (launch);
                 print ("Loaded sound " + www_launch.url);
@@ -487,6 +489,24 @@ namespace RBR
                     prev_beep_pitch_slider = beep_pitch_slider;
                 }
 
+                // Only draw launch volume slider if we haven't launched yet.
+                if (vessel_prev_sit == Vessel.Situations.PRELAUNCH)
+                {
+                    GUILayout.BeginHorizontal (GUILayout.ExpandWidth (true));
+                    launch_vol_slider = GUILayout.HorizontalSlider(launch_vol_slider, 0, 1f, GUILayout.ExpandWidth (true));
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal(GUILayout.ExpandWidth (true));
+                    GUILayout.Label("Launch volume: " + (launch_vol_slider * 100).ToString ("F0") + "%", label_txt_left, GUILayout.ExpandWidth(true));
+                    GUILayout.EndHorizontal();
+
+                    if (launch_vol_slider != prev_launch_vol_slider)
+                    {
+                        print ("Launch volume has been changed, changing volume for all sounds...");
+                        foreach (AudioSource aud in all_launch_clips) aud.volume = launch_vol_slider;
+                        prev_launch_vol_slider = launch_vol_slider;
+                    }
+                }
                 //GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                 //if (GUILayout.Button("Change", GUILayout.ExpandWidth(false)))
                 //{
@@ -547,6 +567,25 @@ namespace RBR
                     foreach (AudioSource aud in all_con_chatter) aud.volume = chatter_vol_slider;
                     foreach (AudioSource aud in all_pod_chatter) aud.volume = chatter_vol_slider;
                     prev_chatter_vol_slider = chatter_vol_slider;
+                }
+
+                // Only draw launch volume slider if we haven't launched yet.
+                if (vessel_prev_sit == Vessel.Situations.PRELAUNCH)
+                {
+                    GUILayout.BeginHorizontal (GUILayout.ExpandWidth (true));
+                    launch_vol_slider = GUILayout.HorizontalSlider(launch_vol_slider, 0, 1f, GUILayout.ExpandWidth (true));
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal(GUILayout.ExpandWidth (true));
+                    GUILayout.Label("Launch volume: " + (launch_vol_slider * 100).ToString ("F0") + "%", label_txt_left, GUILayout.ExpandWidth(true));
+                    GUILayout.EndHorizontal();
+
+                    if (launch_vol_slider != prev_launch_vol_slider)
+                    {
+                        print ("Launch volume has been changed, changing volume for all sounds...");
+                        foreach (AudioSource aud in all_launch_clips) aud.volume = launch_vol_slider;
+                        prev_launch_vol_slider = launch_vol_slider;
+                    }
                 }
 
                 GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
