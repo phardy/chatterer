@@ -711,12 +711,6 @@ namespace RBR
                             }
                         }
 
-                        if (vessel_prev_sit == Vessel.Situations.PRELAUNCH && vessel.situation != Vessel.Situations.PRELAUNCH)
-                        {
-                            print("beginning launch");
-                            play_launch_clip();
-                        }
-
                         if (vessel.currentStage != vessel_prev_stage && exchange_playing == false)
                         {
                             print("beginning exchange,staging");
@@ -752,6 +746,13 @@ namespace RBR
                         }
                     }
                 }
+                
+                if (vessel_prev_sit == Vessel.Situations.PRELAUNCH && vessel.situation != Vessel.Situations.PRELAUNCH)
+                {
+                    print("beginning launch");
+                    play_launch_clip();
+                }
+
                 vessel_prev_sit = vessel.situation;
                 vessel_prev_stage = vessel.currentStage;
             }
