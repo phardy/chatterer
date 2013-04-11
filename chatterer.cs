@@ -40,6 +40,7 @@ namespace RBR
         private List<AudioSource> all_beep_clips = new List<AudioSource>();
         private List<AudioSource> all_con_chatter = new List<AudioSource>();
         private List<AudioSource> all_pod_chatter = new List<AudioSource>();
+        private List<AudioSource> all_launch_clips = new List<AudioSource>();
         private List<AudioSource> initial_chatter_set = new List<AudioSource>();
         private int initial_chatter_index;
         private List<AudioSource> response_chatter_set = new List<AudioSource>();
@@ -66,6 +67,7 @@ namespace RBR
         private int total_beep_clips = 1;
         private int total_con_clips = 16;
         private int total_pod_clips = 17;
+        private int total_launch_clips = 1;
         private int current_beep_clip;
         private int current_con_clip;
         private int current_pod_clip;
@@ -262,6 +264,33 @@ namespace RBR
             print("sounds loaded: " + (all_pod_chatter.Count + all_con_chatter.Count).ToString());
         }
 
+        private void load_launch_clip(int counter)
+        {
+            AudioSource launch = gameObject.AddComponent<AudioSource>();
+            string path = "file://" + KSPUtil.ApplicationRootPath.Replace ("\\", "/") + "PluginData/rbr_chatterer/ksp_launch_" + counter.ToString("D2") + ".ogg";
+            WWW www_launch = new WWW(path);
+
+            if (launch != null && www_launch != null)
+            {
+                launch.clip = www_launch.GetAudioClip (false);
+                launch.volume = chatter_vol_slider;
+                launch.Stop();
+                all_launch_clips.Add (launch);
+                print ("Loaded sound " + www_launch.url);
+            }
+            else print("Failed to load sound " + www_launch.url);
+        }
+
+        private void load_all_launches()
+        {
+            int i;
+            for (i = 1; i <= total_launch_clips; i++)
+            {
+                load_launch_clip(i);
+            }
+            print ("launch sounds loaded: " + all_launch_clips.Count.ToString ());
+        }
+
         private void set_new_delay_between_exchanges()
         {
             if (chatter_freq == 1) secs_between_exchanges = rand.Next(180, 300);
@@ -298,6 +327,13 @@ namespace RBR
                 initial_chatter_index = current_pod_clip;
                 response_chatter_index = current_con_clip;
             }
+        }
+
+        private void play_launch_clip()
+        {
+            int current_launch_clip = rand.Next (0, all_launch_clips.Count); // select a launch clip to play
+            print("playing launch clip, launch clip source: " + current_launch_clip);
+            all_launch_clips[current_launch_clip].Play();
         }
 
         private void begin_exchange(ulong delay)
@@ -584,6 +620,7 @@ namespace RBR
                     load_all_chatter();
                     initialize_new_exchange();
                 }
+				load_all_launches();
             }
         }
 
@@ -633,6 +670,12 @@ namespace RBR
                                     begin_exchange(0);
                                 }
                             }
+                        }
+
+                        if (vessel_prev_sit == Vessel.Situations.PRELAUNCH && vessel.situation != Vessel.Situations.PRELAUNCH)
+                        {
+                            print("beginning launch");
+                            play_launch_clip();
                         }
 
                         if (vessel.currentStage != vessel_prev_stage && exchange_playing == false)
